@@ -29,8 +29,8 @@ public class PasswordHashService : IPasswordHashService
     public bool VerifyPassword(string password, byte[] storedHash, byte[] storedSalt)
     {
         if (string.IsNullOrEmpty(password)) return false;
-        if (storedHash == null || storedHash.Length != HashSize) return false;
-        if (storedSalt == null || storedSalt.Length != SaltSize) return false;
+        if (storedHash is not { Length: HashSize }) return false;
+        if (storedSalt is not { Length: SaltSize }) return false;
 
         byte[] computedHash;
         using (var deriveBytes = new Rfc2898DeriveBytes(password, storedSalt, Iterations, HashAlgorithmName.SHA256))

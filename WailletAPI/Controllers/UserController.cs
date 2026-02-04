@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WailletAPI.Dto;
 using WailletAPI.Models;
 using WailletAPI.Repository;
 using WailletAPI.Services;
@@ -18,11 +19,8 @@ public class UserController : ControllerBase
         _passwordService = passwordService;
     }
 
-    public record RegisterRequest(string UserName, string Password, string NickName);
-    public record LoginRequest(string UserName, string Password);
-
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest req)
+    public async Task<IActionResult> Register([FromBody] RegisterUserRequest req)
     {
         if (string.IsNullOrWhiteSpace(req.UserName) || string.IsNullOrWhiteSpace(req.Password))
             return BadRequest("UserName and Password are required");
@@ -49,7 +47,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest req)
+    public async Task<IActionResult> Login([FromBody] UserLoginRequest req)
     {
         var user = await _repository.GetByUserNameAsync(req.UserName);
         if (user == null)
