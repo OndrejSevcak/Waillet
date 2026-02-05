@@ -7,11 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
         <!-- Added EF Core packages for SQL Server development -->
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.12" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
     </ItemGroup>
 
     <ItemGroup>
