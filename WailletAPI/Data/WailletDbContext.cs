@@ -12,6 +12,7 @@ namespace WailletAPI.Data
         public DbSet<Account> Accounts { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<CryptoCurrency> CryptoCurrencies { get; set; } = null!;
+        public DbSet<Transaction> Transactions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -62,6 +63,20 @@ namespace WailletAPI.Data
                 new CryptoCurrency { Code = "ETH", Name = "Ethereum" },
                 new CryptoCurrency { Code = "LTC", Name = "Litecoin" }
             );
+
+            // Configure Transaction entity
+            modelBuilder.Entity<Transaction>(tb =>
+            {
+                tb.HasKey(t => t.TxKey);
+                tb.Property(t => t.AmountFrom).HasColumnType("decimal(19,8)");
+                tb.Property(t => t.AmountTo).HasColumnType("decimal(19,8)");
+                tb.Property(t => t.Rate).HasColumnType("decimal(19,8)");
+                tb.Property(t => t.CurrencyFrom).HasMaxLength(10).HasColumnName("currency_from");
+                tb.Property(t => t.CurrencyTo).HasMaxLength(10).HasColumnName("currency_to");
+                tb.Property(t => t.Type).HasMaxLength(50).HasColumnName("type");
+                tb.Property(t => t.Status).HasMaxLength(50).HasColumnName("status");
+                tb.Property(t => t.CreatedAt).HasColumnName("created_at");
+            });
         }
     }
 }

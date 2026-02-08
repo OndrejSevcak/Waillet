@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WailletAPI.Data;
 
@@ -11,9 +12,11 @@ using WailletAPI.Data;
 namespace WailletAPI.Migrations
 {
     [DbContext(typeof(WailletDbContext))]
-    partial class WailletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260208110416_addTransactionTable")]
+    partial class addTransactionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

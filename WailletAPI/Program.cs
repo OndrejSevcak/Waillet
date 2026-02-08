@@ -26,6 +26,11 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
+// Transaction services
+builder.Services.AddScoped<TransactionRepository>();
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<IExchangeRateService, DummyExchangeRateService>();
+
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 if (jwtSettings == null)

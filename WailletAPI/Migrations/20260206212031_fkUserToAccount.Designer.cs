@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WailletAPI.Data;
 
@@ -11,9 +12,11 @@ using WailletAPI.Data;
 namespace WailletAPI.Migrations
 {
     [DbContext(typeof(WailletDbContext))]
-    partial class WailletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260206212031_fkUserToAccount")]
+    partial class fkUserToAccount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace WailletAPI.Migrations
                         .HasColumnType("varchar(10)")
                         .HasColumnName("currency_code");
 
-                    b.Property<long>("UserKey")
+                    b.Property<long?>("UserKey")
                         .HasColumnType("bigint")
                         .HasColumnName("user_key");
 
@@ -67,102 +70,6 @@ namespace WailletAPI.Migrations
                         .HasFilter("crypto_flag = 1");
 
                     b.ToTable("Accounts");
-                });
-
-            modelBuilder.Entity("WailletAPI.Models.CryptoCurrency", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("code");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("CryptoCurrencies");
-
-                    b.HasData(
-                        new
-                        {
-                            Code = "BTC",
-                            Name = "Bitcoin"
-                        },
-                        new
-                        {
-                            Code = "ETH",
-                            Name = "Ethereum"
-                        },
-                        new
-                        {
-                            Code = "LTC",
-                            Name = "Litecoin"
-                        });
-                });
-
-            modelBuilder.Entity("WailletAPI.Models.Transaction", b =>
-                {
-                    b.Property<long>("TxKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("tx_key");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("TxKey"));
-
-                    b.Property<decimal>("AmountFrom")
-                        .HasColumnType("decimal(19,8)")
-                        .HasColumnName("amount_from");
-
-                    b.Property<decimal>("AmountTo")
-                        .HasColumnType("decimal(19,8)")
-                        .HasColumnName("amount_to");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CurrencyFrom")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("currency_from");
-
-                    b.Property<string>("CurrencyTo")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("currency_to");
-
-                    b.Property<long>("FromAccKey")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_acc_key");
-
-                    b.Property<long>("InitiatorUserKey")
-                        .HasColumnType("bigint")
-                        .HasColumnName("initiator_user_key");
-
-                    b.Property<decimal>("Rate")
-                        .HasColumnType("decimal(19,8)")
-                        .HasColumnName("rate");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("status");
-
-                    b.Property<long>("ToAccKey")
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_acc_key");
-
-                    b.Property<string>("Type")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("type");
-
-                    b.HasKey("TxKey");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("WailletAPI.Models.User", b =>
@@ -210,8 +117,7 @@ namespace WailletAPI.Migrations
                     b.HasOne("WailletAPI.Models.User", "User")
                         .WithMany("Accounts")
                         .HasForeignKey("UserKey")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });
