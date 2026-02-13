@@ -10,14 +10,14 @@ namespace WailletAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class AuthController : ControllerBase
 {
     private readonly UserRepository _repository;
     private readonly IPasswordHashService _passwordService;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly JwtSettings _jwtSettings;
 
-    public UserController(UserRepository repository, IPasswordHashService passwordService, IJwtTokenService jwtTokenService, IOptions<JwtSettings> jwtSettings)
+    public AuthController(UserRepository repository, IPasswordHashService passwordService, IJwtTokenService jwtTokenService, IOptions<JwtSettings> jwtSettings)
     {
         _repository = repository;
         _passwordService = passwordService;

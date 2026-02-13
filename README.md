@@ -1,28 +1,76 @@
-# Waillet API
+# Waillet
 
-A crypto wallet management API built with .NET 10
+A custodial crypto wallet web app that allows users to:
 
-## Features
+- Hold crypto (BTC, ETH)
+- Convert between assets
+- Track portfolio
+- View transaction history
 
-- User registration and authentication
-- JWT token-based security
-- Password hashing using PBKDF2 with salt
-- Account management
-- Money transfer between accounts
-- Exchanged rate retrieval
+*This is a personal coding project. Not going to be lanuched.*
 
-## API Endpoints
+## High-Level System Architecture
 
-### User Management
+### Frontend
 
-- `POST /api/user/register` - Register a new user
-- `POST /api/user/login` - Authenticate and receive JWT token
+- React (vite)
+- Auth UI
+- Dashboard 
+- Swap screen 
+- History
 
-#### Accounts
-- `POST /api/accounts` \- Vytvořit nový účet. 
+### Backend 
+
+- .NET API
+
+Core services:
+
+- Auth Service
+- Wallet Service 
+- Ledger Service 
+- Blockchain Service 
+- Conversion Service 
+- Pricing Service
+
+Infrastructure
+
+- SQL Server (ledger + users)
+- Redis (price cache)
+- Blockchain RPC providers (Infura/Alchemy)
+- Background workers
+
+## High-Level System Architecture Diagram
+
+[ React Frontend ]
+        |
+        v
+[ API Gateway / ASP.NET Core API ]
+        |
+        +-------------------+
+        |                   |
+[ Application Layer ]  [ Background Workers ]
+        |                   |
+[ Domain Layer ]       [ Blockchain Listener ]
+        |
+[ Infrastructure Layer ]
+        |
+- SQL Server
+- Redis
+- External Price API
+- Blockchain RPC
 
 
-### Transactions
-- `POST /api/transactions/exchange` - Převést peníze mezi účty dle aktuálního směnného kurzu.
+## Core Domain Models
 
+- User
+- WalletAccount -> one account per user per asset (BTC, ETH)
+- LedgerEntry -> records all transactions (deposits, withdrawals, swaps)
+  - Id
+  - WalletAccountId
+  - AssetType (BTC, ETH)
+  - Amount DECIMAL(38,8)
+  - TransactionType (Deposit, Withdrawal, Swap, Fee)
+  - Timestamp
+- SwapTransaction -> internal swaps
+- WithdrawalTransaction -> withdrawals to external addresses
 
