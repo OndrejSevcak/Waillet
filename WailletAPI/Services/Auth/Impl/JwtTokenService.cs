@@ -4,9 +4,9 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WailletAPI.Configuration;
-using WailletAPI.Models;
+using WailletAPI.Entities;
 
-namespace WailletAPI.Services;
+namespace WailletAPI.Services.Auth.Impl;
 
 public class JwtTokenService : IJwtTokenService
 {
@@ -29,8 +29,7 @@ public class JwtTokenService : IJwtTokenService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UserKey.ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-            new Claim("nickname", user.NickName),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };

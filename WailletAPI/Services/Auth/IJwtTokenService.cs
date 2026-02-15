@@ -1,6 +1,6 @@
-using WailletAPI.Models;
+using WailletAPI.Entities;
 
-namespace WailletAPI.Services;
+namespace WailletAPI.Services.Auth;
 
 public interface IJwtTokenService
 {

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using WailletAPI.Data;
-using WailletAPI.Models;
+using WailletAPI.Entities;
 
-namespace WailletAPI.Repository;
+namespace WailletAPI.Repository.Implementations;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
     private readonly WailletDbContext _context;
 
@@ -13,15 +13,15 @@ public class UserRepository
         _context = context;
     }
 
-    public async Task AddUserAsync(User user)
-    {
-        _context.Users.Add(user);
+    public async Task<User> AddUserAsync(User user) {
+        var created = _context.Users.Add(user);
         await _context.SaveChangesAsync();
+        return created.Entity;
     }
 
-    public Task<User?> GetByUserNameAsync(string userName)
+    public Task<User?> GetByUserNameAsync(string email)
     {
-        return _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+        return _context.Users.SingleOrDefaultAsync(u => u.Email == email);
     }
 
     public Task<User?> GetByIdAsync(long userKey)

@@ -1,11 +1,8 @@
-using System;
 using Microsoft.Extensions.Options;
-using Xunit;
 using WailletAPI.Configuration;
-using WailletAPI.Models;
-using WailletAPI.Services;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+using WailletAPI.Entities;
+using WailletAPI.Services.Auth.Impl;
 
 namespace WailletAPI.Tests;
 
@@ -33,11 +30,9 @@ public class JwtTokenServiceTests
         var user = new User
         {
             UserKey = 1,
-            UserName = "testuser",
-            NickName = "Test User",
+            Email = "test@user.com",
             PasswordHash = new byte[32],
             PasswordSalt = new byte[32],
-            Level = 1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -56,11 +51,9 @@ public class JwtTokenServiceTests
         var user = new User
         {
             UserKey = 123,
-            UserName = "johndoe",
-            NickName = "John Doe",
+            Email = "test@user.com",
             PasswordHash = new byte[32],
             PasswordSalt = new byte[32],
-            Level = 1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -72,8 +65,7 @@ public class JwtTokenServiceTests
         var jwtToken = handler.ReadJwtToken(token);
         
         Assert.Equal("123", jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value);
-        Assert.Equal("johndoe", jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.UniqueName).Value);
-        Assert.Equal("John Doe", jwtToken.Claims.First(c => c.Type == "nickname").Value);
+        Assert.Equal("test@user.com", jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value);
         Assert.Equal(_jwtSettings.Issuer, jwtToken.Issuer);
         Assert.Equal(_jwtSettings.Audience, jwtToken.Audiences.First());
     }
@@ -85,11 +77,9 @@ public class JwtTokenServiceTests
         var user = new User
         {
             UserKey = 1,
-            UserName = "testuser",
-            NickName = "Test User",
+            Email = "test@user.com",
             PasswordHash = new byte[32],
             PasswordSalt = new byte[32],
-            Level = 1,
             CreatedAt = DateTime.UtcNow
         };
 

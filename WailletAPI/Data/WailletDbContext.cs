@@ -1,82 +1,135 @@
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using WailletAPI.Models;
+using WailletAPI.Entities;
 
-namespace WailletAPI.Data
+namespace WailletAPI.Data;
+
+public partial class WailletDbContext : DbContext
 {
-    public class WailletDbContext : DbContext
+    public WailletDbContext()
     {
-        public WailletDbContext(DbContextOptions<WailletDbContext> options) : base(options)
-        {
-        }
-
-        public DbSet<Account> Accounts { get; set; } = null!;
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<CryptoCurrency> CryptoCurrencies { get; set; } = null!;
-        public DbSet<Transaction> Transactions { get; set; } = null!;
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            // Ensure UserKey is required (NOT NULL)
-            modelBuilder.Entity<Account>()
-                .Property(a => a.UserKey)
-                .IsRequired();
-
-            // Configure one-to-many: User -> Accounts
-            modelBuilder.Entity<Account>()
-                .HasOne(a => a.User)
-                .WithMany(u => u.Accounts)
-                .HasForeignKey(a => a.UserKey)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Unique fiat account per user (crypto_flag = 0)
-            modelBuilder.Entity<Account>()
-                .HasIndex(a => a.UserKey)
-                .IsUnique()
-                .HasFilter("crypto_flag = 0");
-
-            // Unique crypto account per user per currency (crypto_flag = 1)
-            // Use CurrencyCode for crypto accounts as requested
-            modelBuilder.Entity<Account>()
-                .HasIndex(a => new { a.UserKey, a.CurrencyCode })
-                .IsUnique()
-                .HasFilter("crypto_flag = 1");
-
-            // Configure CryptoCurrency entity
-            modelBuilder.Entity<CryptoCurrency>()
-                .HasKey(c => c.Code);
-
-            modelBuilder.Entity<CryptoCurrency>()
-                .Property(c => c.Code)
-                .HasMaxLength(10)
-                .HasColumnName("code");
-
-            modelBuilder.Entity<CryptoCurrency>()
-                .Property(c => c.Name)
-                .HasMaxLength(100)
-                .HasColumnName("name");
-
-            // Seed default crypto currencies
-            modelBuilder.Entity<CryptoCurrency>().HasData(
-                new CryptoCurrency { Code = "BTC", Name = "Bitcoin" },
-                new CryptoCurrency { Code = "ETH", Name = "Ethereum" },
-                new CryptoCurrency { Code = "LTC", Name = "Litecoin" }
-            );
-
-            // Configure Transaction entity
-            modelBuilder.Entity<Transaction>(tb =>
-            {
-                tb.HasKey(t => t.TxKey);
-                tb.Property(t => t.AmountFrom).HasColumnType("decimal(19,8)");
-                tb.Property(t => t.AmountTo).HasColumnType("decimal(19,8)");
-                tb.Property(t => t.Rate).HasColumnType("decimal(19,8)");
-                tb.Property(t => t.CurrencyFrom).HasMaxLength(10).HasColumnName("currency_from");
-                tb.Property(t => t.CurrencyTo).HasMaxLength(10).HasColumnName("currency_to");
-                tb.Property(t => t.Type).HasMaxLength(50).HasColumnName("type");
-                tb.Property(t => t.Status).HasMaxLength(50).HasColumnName("status");
-                tb.Property(t => t.CreatedAt).HasColumnName("created_at");
-            });
-        }
     }
+
+    public WailletDbContext(DbContextOptions<WailletDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Account> Accounts { get; set; }
+
+    public virtual DbSet<Ledger> Ledgers { get; set; }
+
+    public virtual DbSet<SwapTransaction> SwapTransactions { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
+    
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.HasKey(e => e.AccKey).HasName("PK__Accounts__2D40EF1C1364D57D");
+
+            entity.HasIndex(e => new { e.UserKey, e.Asset }, "UQ_User_Asset").IsUnique();
+
+            entity.Property(e => e.Asset)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.HasOne(d => d.UserKeyNavigation).WithMany(p => p.Accounts)
+                .HasForeignKey(d => d.UserKey)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Accounts__UserKe__3F466844");
+        });
+
+        modelBuilder.Entity<Ledger>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Ledger__3214EC07DC8A7D28");
+
+            entity.ToTable("Ledger");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.Asset)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.ReferenceType)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Type)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.AccKeyNavigation).WithMany(p => p.Ledgers)
+                .HasForeignKey(d => d.AccKey)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Ledger__AccKey__4AB81AF0");
+        });
+
+        modelBuilder.Entity<SwapTransaction>(entity =>
+        {
+            entity.HasKey(e => e.SwapId).HasName("PK__SwapTran__816B3609172FB65E");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.FeeAmount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.FromAmount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.FromAsset)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Rate).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.Status)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.ToAmount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.ToAsset)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.UserKeyNavigation).WithMany(p => p.SwapTransactions)
+                .HasForeignKey(d => d.UserKey)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__SwapTrans__UserK__4316F928");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserKey).HasName("PK__Users__296ADCF122BD6EEC");
+
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053464F18E81").IsUnique();
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<WithdrawalRequest>(entity =>
+        {
+            entity.HasKey(e => e.WithId).HasName("PK__Withdraw__E369696A7D6F78F3");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.Asset)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.BlockchainTxId).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.FeeAmount).HasColumnType("decimal(38, 18)");
+            entity.Property(e => e.Status)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.ToAddress).HasMaxLength(255);
+
+            entity.HasOne(d => d.UserKeyNavigation).WithMany(p => p.WithdrawalRequests)
+                .HasForeignKey(d => d.UserKey)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Withdrawa__UserK__46E78A0C");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

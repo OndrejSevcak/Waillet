@@ -5,7 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using WailletAPI.Configuration;
 using WailletAPI.Data;
 using WailletAPI.Repository;
+using WailletAPI.Repository.Implementations;
 using WailletAPI.Services;
+using WailletAPI.Services.Auth;
+using WailletAPI.Services.Auth.Impl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,16 +22,12 @@ builder.Services.AddDbContext<WailletDbContext>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
 // Register services
-builder.Services.AddScoped<AccountRepository>();
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<CryptoCurrencyRepository>();
-builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // Transaction services
-builder.Services.AddScoped<TransactionRepository>();
-builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<IExchangeRateService, DummyExchangeRateService>();
 
 // Configure JWT authentication
