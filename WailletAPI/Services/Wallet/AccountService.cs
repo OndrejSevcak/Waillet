@@ -1,3 +1,4 @@
+using WailletAPI.Common;
 using WailletAPI.Entities;
 using WailletAPI.Repository;
 
@@ -11,31 +12,37 @@ public class AccountService : IAccountService
 {
     private readonly IUserRepository _userRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IAssetRepository _assetRepository;
 
-    public AccountService(IUserRepository userRepository, IAccountRepository accountRepository)
+    public AccountService(IUserRepository userRepository, IAccountRepository accountRepository, IAssetRepository assetRepository)
     {
         _userRepository = userRepository;
         _accountRepository = accountRepository;
+        _assetRepository = assetRepository;
     }
     
     /// <summary>
-    /// One wallet per user
-    /// Multiple assets per wallet account
+    /// One wallet per user per asset
     /// Negative balance is not allowed
     /// </summary>
-    public async Task<Account> CreateWalletAccount(long userKey, string asset)
+    public async Task<Result<Account>> CreateWalletAccount(long userKey, string asset)
     {
         var user = await _userRepository.GetByIdAsync(userKey);
-        
         if (user is null)
         {
-            throw new Exception("User not found");
+            return Result<Account>.Fail(new Error(ErrorCode.BadRequest, "User not found"));
+        }
+        
+        var availableAssets = await _assetRepository.GetAllAsync();
+        if (!availableAssets.Any(a => a.Symbol.Equals(asset, StringComparison.OrdinalIgnoreCase)))
+        {
+            return Result<Account>.Fail(new Error(ErrorCode.BadRequest, $"Asset '{asset}' is not supported"));
         }
         
         var existingAccounts = await _accountRepository.GetAccountsByUserAsync(userKey);
-        if (existingAccounts.Any())
+        if (existingAccounts.Any(a => a.Asset == asset))
         {
-            throw new Exception("Account already exists");
+            throw new Exception($"Wallet account for {asset} asset already exists");
         }
         
         var account = new Account
@@ -44,6 +51,7 @@ public class AccountService : IAccountService
             Asset = asset,
         };
         
-        return await _accountRepository.CreateAccountAsync(account);
+        var created = await _accountRepository.CreateAccountAsync(account);
+        return Result<Account>.Ok(created);
     }
 }

@@ -65,3 +65,20 @@ CREATE TABLE dbo.Ledger (
     ReferenceType VARCHAR(50) NOT NULL, -- Swap, Withdrawal, Deposit
     CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
+
+-- sql
+CREATE TABLE Assets (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Symbol NVARCHAR(16) NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Decimals TINYINT NOT NULL DEFAULT 8,
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_SupportedAssets_Symbol UNIQUE (Symbol)
+);
+
+--seed
+INSERT INTO Assets (Symbol, Name, Decimals, IsActive)
+VALUES ('BTC', 'Bitcoin', 8, 1),
+       ('ETH', 'Ethereum', 18, 1);

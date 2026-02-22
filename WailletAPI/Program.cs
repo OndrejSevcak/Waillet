@@ -31,6 +31,7 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 //Register wallet services
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 
 
 // Configure JWT authentication

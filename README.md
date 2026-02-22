@@ -15,7 +15,7 @@ A custodial crypto wallet web app that allows users to:
 
 - React (vite)
 - Auth UI
-- Dashboard 
+- Wallet Dashboard 
 - Swap screen 
 - History
 
@@ -36,7 +36,7 @@ Infrastructure
 
 - SQL Server (ledger + users)
 - Redis (price cache)
-- Blockchain RPC providers (Infura/Alchemy)
+- Blockchain RPC providers
 - Background workers
 
 ## High-Level System Architecture Diagram
@@ -78,18 +78,4 @@ flowchart TB
     INF --> PRICE
     BL --> RPC
 ```
-
-## Core Domain Models
-
-- User
-- WalletAccount -> one account per user per asset (BTC, ETH)
-- LedgerEntry -> records all transactions (deposits, withdrawals, swaps)
-  - Id
-  - WalletAccountId
-  - AssetType (BTC, ETH)
-  - Amount DECIMAL(38,8)
-  - TransactionType (Deposit, Withdrawal, Swap, Fee)
-  - Timestamp
-- SwapTransaction -> internal swaps
-- WithdrawalTransaction -> withdrawals to external addresses
 
