@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Waillet.Blazor/Waillet.Blazor.csproj" />
   <Project Path="WailletAPI.Tests/WailletAPI.Tests.csproj" />
   <Project Path="WailletAPI/WailletAPI.csproj" />
 </Solution>

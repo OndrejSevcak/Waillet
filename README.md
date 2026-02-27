@@ -13,7 +13,7 @@ A custodial crypto wallet web app that allows users to:
 
 ### Frontend
 
-- React (vite)
+- React (vite) or Blazor
 - Auth UI
 - Wallet Dashboard 
 - Swap screen 

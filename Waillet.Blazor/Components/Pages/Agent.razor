@@ -1,0 +1,52 @@
+@page "/agent"
+
+<PageTitle>Agent.md</PageTitle>
+
+<h1>Agent.md</h1>
+
+<p>
+    <strong>Agent.md</strong> files are designed to guide AI agents like GitHub Copilot in making focused code changes while adhering to project-specific rules and constraints. By defining the purpose, scope, rules, and workflow in an Agent.md file, developers can ensure that AI-generated code aligns with their project's standards and requirements.
+</p>
+
+<h2>Basic structure</h2>
+
+<pre><code># Agent.md
+
+## Purpose
+Describe what this agent should do.
+
+## Scope
+- What it can change
+- What it must not change
+
+## Rules
+- Keep changes minimal
+- Follow existing coding style
+- Run build/tests after edits
+
+## Workflow
+1. Read relevant files
+2. Propose or apply focused changes
+3. Validate with build/tests
+4. Summarize results and next steps
+
+## Output format
+- Short summary
+- Changed files
+- Validation status
+</code></pre>
+
+<h2>How to use with Copilot</h2>
+
+<ol>
+    <li>Create or update your <strong>Agent.md</strong> in the repository.</li>
+    <li>Describe the task in chat (for example: "Implement X using rules from Agent.md").</li>
+    <li>Ask Copilot to follow the file constraints while making changes.</li>
+    <li>Review changed files and run/build results before committing.</li>
+</ol>
+
+<p>
+    Tip: keep <strong>Agent.md</strong> short, specific, and project-focused.<br>
+    More details: <a href="https://learn.microsoft.com/en-us/azure/ai-services/cognitive-agents/agent-md" target="_blank">Agent.md documentation</a>
+    <a href="https://agents.md/">agents.md website</a>
+</p>
