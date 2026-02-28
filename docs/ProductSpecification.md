@@ -36,7 +36,6 @@ The system is designed with:
 
 * Implement double-entry ledger system
 * Ensure transactional integrity (ACID)
-* Maintain high precision for financial values (`DECIMAL(38,18)`)
 * Follow Clean Architecture
 * Be cloud-deployable and horizontally scalable
 
@@ -91,7 +90,7 @@ Manage authenticated users and associate them with wallet accounts.
 
 ### Technical Considerations
 
-* ASP.NET Identity (recommended)
+* ASP.NET Identity
 * JWT-based authentication
 * Password hashing (PBKDF2 / ASP.NET Identity default)
 
@@ -102,6 +101,7 @@ Manage authenticated users and associate them with wallet accounts.
 ### Purpose
 
 Represents a financial account owned by a user.
+Each user will have a separate wallet account for each crypto asset.
 
 ### Functional Requirements
 
@@ -111,16 +111,14 @@ Represents a financial account owned by a user.
 
 ### Entity: WalletAccount
 
-| Field     | Type             | Description        |
-| --------- | ---------------- | ------------------ |
-| Id        | UNIQUEIDENTIFIER | Primary key        |
-| UserId    | UNIQUEIDENTIFIER | Owner              |
-| CreatedAt | DATETIME2        | Creation timestamp |
-| Status    | VARCHAR          | Active, Suspended  |
+- acckey
+- useKey
+- asset
+- createdAt
 
 ### Business Rules
 
-* One user can have multiple wallet accounts
+* One user can have multiple wallet accounts, one for each crypto asset
 * Wallet accounts cannot be deleted if ledger entries exist
 
 ---
@@ -142,31 +140,72 @@ Maintain an immutable financial transaction record using double-entry accounting
 
 ### Entity: LedgerEntry
 
-| Field           | Type             | Description                                     |
-| --------------- | ---------------- | ----------------------------------------------- |
-| Id              | BIGINT           | Identity PK                                     |
-| WalletAccountId | UNIQUEIDENTIFIER | Owner account                                   |
-| Asset           | VARCHAR(10)      | Currency code (USD, EUR, BTC)                   |
-| Amount          | DECIMAL(38,18)   | Positive or negative                            |
-| EntryType       | VARCHAR(50)      | Deposit, Withdrawal, SwapDebit, SwapCredit, Fee |
-| ReferenceId     | UNIQUEIDENTIFIER | Transaction ID                                  |
-| ReferenceType   | VARCHAR(50)      | Swap, Deposit, Withdrawal                       |
-| CreatedAt       | DATETIME2        | Timestamp                                       |
+- Id
+- AccKey
+- Asset
+- Amount
+- Type (Deposit, Withdrawal, SwapDebit, SwapCredit, Fee)
+- ReferenceId (ID of the business entity that caused this ledger entry - SwapId, DepositId, WithdrawalId..)
+- ReferenceType (what kind of business operation it was - swap, deposit, withdrawal)
+- CreatedAt
+
+#### What is the concept behind ReferenceId and ReferenceType
+
+- ReferenceId and ReferenceType are crucial for traceability and consistency.
+- They exist to answer one fundamental question:
+    “Why does this ledger entry exist?”
+
+-A ledger entry should never exist in isolation.
+- It must be the financial effect of a business operation
+- *ReferenceId + ReferenceType link the ledger row to a business operation.*
+
+#### Why This Is Architecturally Important
+
+In financial systems, your ledger must be:
+
+- Immutable
+- Auditable
+- Reconstructable
+
+You must be able to:
+
+- Rebuild balances from ledger entries
+- Investigate issues
+- Trace fees
+- Trace swap calculations
+- Reverse transactions safely
+
+Without ReferenceId and ReferenceType, you lose audit traceability.
+
+#### Example: BTC → ETH Swap
+
+Suppose user swaps:
+
+1 BTC → 14 ETH
+Fee: 0.01 BTC
+
+You would likely create 3 ledger entries:
+
+| Id | Asset | Amount | EntryType  | ReferenceType | ReferenceId |
+| -- | ----- | ------ | ---------- | ------------- | ----------- |
+| 1  | BTC   | -1.00  | SwapDebit  | Swap          | 123456      |
+| 2  | BTC   | -0.01  | Fee        | Swap          | 123456      |
+| 3  | ETH   | +14.00 | SwapCredit | Swap          | 123456      |
+
+#### Example Deposit
+
+User deposits 0.5 BTC:
+
+| Asset | Amount | EntryType | ReferenceType | ReferenceId |
+| ----- | ------ | --------- | ------------- | ----------- |
+| BTC   | +0.5   | Deposit   | Deposit       | 5484651   |
+
 
 ---
 
 ### Balance Calculation
 
-Balance is computed as:
-
-```sql
-SELECT SUM(Amount)
-FROM LedgerEntries
-WHERE WalletAccountId = @WalletId
-AND Asset = @Asset
-```
-
-No balance is stored — it is derived.
+Balance is computed based on ledger entries, never stored 
 
 ---
 
@@ -274,7 +313,7 @@ Move funds between wallet accounts.
 
 * Index on:
 
-  * WalletAccountId
+  * AccKey
   * ReferenceId
   * Asset
 
@@ -402,10 +441,3 @@ Clean Architecture
 * Swagger documentation complete
 
 ---
-
-If you want, I can now generate:
-
-* A **DDD-focused specification**
-* A **database-first SQL schema file**
-* A **technical architecture decision record (ADR) document**
-* Or a **production-grade enterprise version** with scaling and sharding strategy**
