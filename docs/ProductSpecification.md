@@ -69,7 +69,7 @@ The system is designed with:
 
 ---
 
-## 4.1 Identity & User Management
+## 4.1 Identity & User Management - DONE
 
 ### Purpose
 
@@ -96,7 +96,7 @@ Manage authenticated users and associate them with wallet accounts.
 
 ---
 
-## 4.2 Wallet Accounts
+## 4.2 Wallet Accounts - INPROGRESS
 
 ### Purpose
 
@@ -105,8 +105,8 @@ Each user will have a separate wallet account for each crypto asset.
 
 ### Functional Requirements
 
-* Create wallet account
-* Retrieve wallet balance per asset
+* Create wallet account - DONE
+* Retrieve wallet balance per asset - DONE
 * Retrieve account transaction history
 
 ### Entity: WalletAccount

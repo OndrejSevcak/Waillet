@@ -1,4 +1,5 @@
 using WailletAPI.Common;
+using WailletAPI.Dto;
 using WailletAPI.Entities;
 using WailletAPI.Repository;
 
@@ -13,12 +14,18 @@ public class AccountService : IAccountService
     private readonly IUserRepository _userRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly IAssetRepository _assetRepository;
+    private readonly ILedgerRepository _ledgerRepository;
 
-    public AccountService(IUserRepository userRepository, IAccountRepository accountRepository, IAssetRepository assetRepository)
+    public AccountService(
+        IUserRepository userRepository,
+        IAccountRepository accountRepository,
+        IAssetRepository assetRepository,
+        ILedgerRepository ledgerRepository)
     {
         _userRepository = userRepository;
         _accountRepository = accountRepository;
         _assetRepository = assetRepository;
+        _ledgerRepository = ledgerRepository;
     }
     
     /// <summary>
@@ -53,5 +60,30 @@ public class AccountService : IAccountService
         
         var created = await _accountRepository.CreateAccountAsync(account);
         return Result<Account>.Ok(created);
+    }
+
+    public async Task<Result<WalletBalanceDto>> GetWalletBalanceAsync(long userKey, long accKey)
+    {
+        var account = await _accountRepository.GetByAccKeyAsync(accKey);
+        if (account is null)
+        {
+            return Result<WalletBalanceDto>.Fail(new Error(ErrorCode.NotFound, "Wallet account not found"));
+        }
+
+        if (account.UserKey != userKey)
+        {
+            return Result<WalletBalanceDto>.Fail(new Error(ErrorCode.Forbidden, "Access to wallet account is forbidden"));
+        }
+
+        var balance = await _ledgerRepository.GetAccountBalanceAsync(accKey);
+
+        var walletBalance = new WalletBalanceDto
+        {
+            AccKey = account.AccKey,
+            Asset = account.Asset,
+            Balance = balance
+        };
+
+        return Result<WalletBalanceDto>.Ok(walletBalance);
     }
 }

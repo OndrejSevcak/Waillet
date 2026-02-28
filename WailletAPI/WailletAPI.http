@@ -1,14 +1,28 @@
 @WailletAPI_HostAddress = http://localhost:5254
+@jwtToken = ""
 
-GET {{WailletAPI_HostAddress}}/weatherforecast/
+### login to get a JWT token for user with id 1
+POST {{WailletAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
 Accept: application/json
+{
+    "userName": "jimmy@jimm.com",
+    "password": "pwdpwd"
+}
 
-###
+### create a new wallet account for user with id 1 and asset BTC
 
-POST {{WailletAPI_HostAddress}}/api/account
+POST {{WailletAPI_HostAddress}}/api/wallet/accounts
+Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{jwtToken}}
+{
+	"userKey": 1,
+	"asset": "BTC"
+}
 
-###
+### get the balance of the wallet account with id 1 for user with id 1
 
-GET {{WailletAPI_HostAddress}}/api/account/1
+GET {{WailletAPI_HostAddress}}/api/wallet/accounts/1/balance
+Authorization: Bearer {{jwtToken}}
 Accept: application/json

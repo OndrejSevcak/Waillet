@@ -17,6 +17,11 @@ public class AccountRepository : IAccountRepository
     {
         return await _context.Accounts.Where(a => a.UserKey == userKey).ToListAsync();
     }
+
+    public async Task<Account?> GetByAccKeyAsync(long accKey)
+    {
+        return await _context.Accounts.FirstOrDefaultAsync(a => a.AccKey == accKey);
+    }
     
     public async Task<Account> CreateAccountAsync(Account account)
     {

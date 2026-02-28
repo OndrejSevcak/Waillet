@@ -1,3 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WailletAPI.Common;
 using WailletAPI.Dto;
@@ -17,6 +20,7 @@ public class WalletController : ControllerBase
         _accountService = accountService;
     }
 
+    [Authorize]
     [HttpPost("accounts")]
     public async Task<ActionResult<AccountDto>> CreateWalletAccount(CreateWalletDto request)
     {
@@ -35,6 +39,25 @@ public class WalletController : ControllerBase
             return Ok(accountDto);
         }
 
-        return StatusCode((int)result.Error.Code, result.Error.Message);
+        return StatusCode((int)result.Error!.Code, result.Error.Message);
+    }
+
+    [Authorize]
+    [HttpGet("accounts/{accountKey:long}/balance")]
+    public async Task<ActionResult<WalletBalanceDto>> GetWalletBalance([FromRoute] long accountKey)
+    {
+        var userKeyClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!long.TryParse(userKeyClaim, out var userKey))
+        {
+            return Unauthorized("Invalid user token");
+        }
+
+        var result = await _accountService.GetWalletBalanceAsync(userKey, accountKey);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+
+        return StatusCode((int)result.Error!.Code, result.Error.Message);
     }
 }
