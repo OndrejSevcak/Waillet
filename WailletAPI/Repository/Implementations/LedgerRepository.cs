@@ -20,12 +20,19 @@ public class LedgerRepository : ILedgerRepository
             .SumAsync(l => (decimal?)l.Amount) ?? 0m;
     }
 
-    public async Task<IReadOnlyList<Ledger>> GetAccountTransactionsAsync(long accKey)
+    public async Task<(IReadOnlyList<Ledger> Transactions, int TotalCount)> GetAccountTransactionsPageAsync(long accKey, int page, int pageSize)
     {
-        return await _context.Ledgers
-            .Where(l => l.AccKey == accKey)
+        var query = _context.Ledgers.Where(l => l.AccKey == accKey);
+
+        var totalCount = await query.CountAsync();
+
+        var transactions = await query
             .OrderByDescending(l => l.CreatedAt)
             .ThenByDescending(l => l.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (transactions, totalCount);
     }
 }

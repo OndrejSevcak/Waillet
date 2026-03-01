@@ -11,6 +11,8 @@ namespace WailletAPI.Services.Wallet;
 /// </summary>
 public class AccountService : IAccountService
 {
+    private const int MaxTransactionsPageSize = 100;
+
     private readonly IUserRepository _userRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly IAssetRepository _assetRepository;
@@ -87,22 +89,25 @@ public class AccountService : IAccountService
         return Result<WalletBalanceDto>.Ok(walletBalance);
     }
 
-    public async Task<Result<IReadOnlyList<WalletTransactionHistoryItemDto>>> GetAccountTransactionHistoryAsync(long userKey, long accKey)
+    public async Task<Result<WalletTransactionHistoryPageDto>> GetAccountTransactionHistoryAsync(long userKey, long accKey, int page, int pageSize)
     {
+        var normalizedPage = page < 1 ? 1 : page;
+        var normalizedPageSize = Math.Clamp(pageSize, 1, MaxTransactionsPageSize);
+
         var account = await _accountRepository.GetByAccKeyAsync(accKey);
         if (account is null)
         {
-            return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Fail(new Error(ErrorCode.NotFound, "Wallet account not found"));
+            return Result<WalletTransactionHistoryPageDto>.Fail(new Error(ErrorCode.NotFound, "Wallet account not found"));
         }
 
         if (account.UserKey != userKey)
         {
-            return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Fail(new Error(ErrorCode.Forbidden, "Access to wallet account is forbidden"));
+            return Result<WalletTransactionHistoryPageDto>.Fail(new Error(ErrorCode.Forbidden, "Access to wallet account is forbidden"));
         }
 
-        var ledgerEntries = await _ledgerRepository.GetAccountTransactionsAsync(accKey);
+        var (ledgerEntries, totalCount) = await _ledgerRepository.GetAccountTransactionsPageAsync(accKey, normalizedPage, normalizedPageSize);
 
-        var transactionHistory = ledgerEntries
+        var transactions = ledgerEntries
             .Select(entry => new WalletTransactionHistoryItemDto
             {
                 Id = entry.Id,
@@ -116,6 +121,18 @@ public class AccountService : IAccountService
             })
             .ToList();
 
-        return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Ok(transactionHistory);
+        var availablePages = totalCount == 0
+            ? 0
+            : (int)Math.Ceiling(totalCount / (double)normalizedPageSize);
+
+        var pageResult = new WalletTransactionHistoryPageDto
+        {
+            TotalCount = totalCount,
+            CurrentPage = normalizedPage,
+            AvailablePages = availablePages,
+            Transactions = transactions
+        };
+
+        return Result<WalletTransactionHistoryPageDto>.Ok(pageResult);
     }
 }

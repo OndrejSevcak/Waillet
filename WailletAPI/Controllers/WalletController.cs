@@ -69,7 +69,10 @@ public class WalletController : ControllerBase
 
     [Authorize]
     [HttpGet("accounts/{accountKey:long}/transactions")]
-    public async Task<ActionResult<IReadOnlyList<WalletTransactionHistoryItemDto>>> GetAccountTransactionHistory([FromRoute] long accountKey)
+    public async Task<ActionResult<WalletTransactionHistoryPageDto>> GetAccountTransactionHistory(
+        [FromRoute] long accountKey,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 100)
     {
         var userKeyClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!long.TryParse(userKeyClaim, out var userKey))
@@ -77,7 +80,7 @@ public class WalletController : ControllerBase
             return Unauthorized("Invalid user token");
         }
 
-        var result = await _accountService.GetAccountTransactionHistoryAsync(userKey, accountKey);
+        var result = await _accountService.GetAccountTransactionHistoryAsync(userKey, accountKey, page, pageSize);
         if (result.IsSuccess)
         {
             return Ok(result.Value);

@@ -81,7 +81,7 @@ public class AccountServiceBalanceTests
     }
 
     [Fact]
-    public async Task GetAccountTransactionHistoryAsync_ExistingOwnedAccount_ReturnsTransactionHistory()
+    public async Task GetAccountTransactionHistoryAsync_ExistingOwnedAccount_ReturnsPagedTransactionHistory()
     {
         var accountRepo = new FakeAccountRepository
         {
@@ -123,14 +123,58 @@ public class AccountServiceBalanceTests
             new FakeAssetRepository(),
             ledgerRepo);
 
-        var result = await service.GetAccountTransactionHistoryAsync(5, 42);
+        var result = await service.GetAccountTransactionHistoryAsync(5, 42, 1, 100);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Count);
-        Assert.Equal(1001, result.Value[0].Id);
-        Assert.Equal("Deposit", result.Value[0].Type);
-        Assert.Equal(1002, result.Value[1].Id);
-        Assert.Equal("Withdrawal", result.Value[1].Type);
+        Assert.Equal(2, result.Value.TotalCount);
+        Assert.Equal(1, result.Value.CurrentPage);
+        Assert.Equal(1, result.Value.AvailablePages);
+        Assert.Equal(2, result.Value.Transactions.Count);
+        Assert.Equal(1002, result.Value.Transactions[0].Id);
+        Assert.Equal("Withdrawal", result.Value.Transactions[0].Type);
+        Assert.Equal(1001, result.Value.Transactions[1].Id);
+        Assert.Equal("Deposit", result.Value.Transactions[1].Type);
+    }
+
+    [Fact]
+    public async Task GetAccountTransactionHistoryAsync_PageSizeOverMax_ReturnsAtMost100NewestTransactions()
+    {
+        var accountRepo = new FakeAccountRepository
+        {
+            Account = new Account { AccKey = 55, UserKey = 2, Asset = "BTC" }
+        };
+
+        var transactions = Enumerable.Range(1, 250)
+            .Select(index => new Ledger
+            {
+                Id = index,
+                AccKey = 55,
+                Asset = "BTC",
+                Amount = index,
+                Type = "Deposit",
+                ReferenceId = index,
+                ReferenceType = "Deposit",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(index)
+            })
+            .ToList();
+
+        var ledgerRepo = new FakeLedgerRepository { Transactions = transactions };
+
+        var service = new AccountService(
+            new FakeUserRepository(),
+            accountRepo,
+            new FakeAssetRepository(),
+            ledgerRepo);
+
+        var result = await service.GetAccountTransactionHistoryAsync(2, 55, 1, 1000);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(250, result.Value.TotalCount);
+        Assert.Equal(1, result.Value.CurrentPage);
+        Assert.Equal(3, result.Value.AvailablePages);
+        Assert.Equal(100, result.Value.Transactions.Count);
+        Assert.Equal(250, result.Value.Transactions[0].Id);
+        Assert.Equal(151, result.Value.Transactions[^1].Id);
     }
 
     [Fact]
@@ -142,7 +186,7 @@ public class AccountServiceBalanceTests
             new FakeAssetRepository(),
             new FakeLedgerRepository());
 
-        var result = await service.GetAccountTransactionHistoryAsync(1, 999);
+        var result = await service.GetAccountTransactionHistoryAsync(1, 999, 1, 100);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorCode.NotFound, result.Error!.Code);
@@ -162,7 +206,7 @@ public class AccountServiceBalanceTests
             new FakeAssetRepository(),
             new FakeLedgerRepository());
 
-        var result = await service.GetAccountTransactionHistoryAsync(3, 77);
+        var result = await service.GetAccountTransactionHistoryAsync(3, 77, 1, 100);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorCode.Forbidden, result.Error!.Code);
@@ -208,6 +252,22 @@ public class AccountServiceBalanceTests
 
         public Task<decimal> GetAccountBalanceAsync(long accKey) => Task.FromResult(Balance);
 
-        public Task<IReadOnlyList<Ledger>> GetAccountTransactionsAsync(long accKey) => Task.FromResult(Transactions);
+        public Task<(IReadOnlyList<Ledger> Transactions, int TotalCount)> GetAccountTransactionsPageAsync(long accKey, int page, int pageSize)
+        {
+            var filtered = Transactions
+                .Where(t => t.AccKey == accKey)
+                .OrderByDescending(t => t.CreatedAt)
+                .ThenByDescending(t => t.Id)
+                .ToList();
+
+            var totalCount = filtered.Count;
+
+            var pageData = filtered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Task.FromResult(((IReadOnlyList<Ledger>)pageData, totalCount));
+        }
     }
 }
