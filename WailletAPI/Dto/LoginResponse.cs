@@ -1,3 +1,9 @@
 namespace WailletAPI.Dto;
 
-public record LoginResponse(string AccessToken, string TokenType, int ExpiresIn);
+
+public class LoginResponse
+{
+    public required string AccessToken { get; set; }
+    public required string TokenType { get; set; }
+    public int ExpiresIn { get; set; }
+}

@@ -21,10 +21,16 @@ public class WalletController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("accounts")]
-    public async Task<ActionResult<AccountDto>> CreateWalletAccount(CreateWalletDto request)
+    [HttpPost("accounts/create/{asset}")]
+    public async Task<ActionResult<AccountDto>> CreateWalletAccount([FromRoute] string asset)
     {
-        Result<Account> result = await _accountService.CreateWalletAccount(request.UserKey, request.Asset);
+        var userKeyClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!long.TryParse(userKeyClaim, out var userKey))
+        {
+            return Unauthorized("Invalid user token");
+        }
+
+        Result<Account> result = await _accountService.CreateWalletAccount(userKey, asset);
         
         if (result.IsSuccess)
         {

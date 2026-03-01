@@ -7,7 +7,7 @@ Content-Type: application/json
 Accept: application/json
 {
     "userName": "jimmy@jimm.com",
-    "password": "pwdpwd"
+    "password": ""
 }
 
 ### create a new wallet account for user with id 1 and asset BTC

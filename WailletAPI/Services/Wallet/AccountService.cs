@@ -49,7 +49,7 @@ public class AccountService : IAccountService
         var existingAccounts = await _accountRepository.GetAccountsByUserAsync(userKey);
         if (existingAccounts.Any(a => a.Asset == asset))
         {
-            throw new Exception($"Wallet account for {asset} asset already exists");
+            return Result<Account>.Fail(new Error(ErrorCode.Conflict, $"Wallet account for {asset} asset already exists"));
         }
         
         var account = new Account

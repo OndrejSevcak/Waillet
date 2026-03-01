@@ -20,10 +20,10 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.RegisterUser(req);
         
-        if (!result.Success)
-            return StatusCode(result.StatusCode, result.Message);
+        if (!result.IsSuccess)
+            return StatusCode((int)result.Error!.Code, result.Error.Message);
 
-        return Ok(result.ReturnObject);
+        return Ok(result.Value);
     }
 
     [HttpPost("login")]
@@ -31,9 +31,9 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.LoginUser(req);
         
-        if (!result.Success)
-            return StatusCode(result.StatusCode, result.Message);
+        if (!result.IsSuccess)
+            return StatusCode((int)result.Error!.Code, result.Error.Message);
 
-        return Ok(result.ReturnObject);
+        return Ok(result.Value);
     }
 }

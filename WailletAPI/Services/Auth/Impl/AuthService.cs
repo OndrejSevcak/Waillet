@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using WailletAPI.Common;
 using WailletAPI.Configuration;
 using WailletAPI.Dto;
 using WailletAPI.Entities;
@@ -12,7 +13,7 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHashService _passwordService;
     private readonly IJwtTokenService _jwtTokenService;
-
+    private readonly IOptions<JwtSettings> _jwtSettings;
 
     public AuthService(
         IUserRepository userRepository, 
@@ -23,18 +24,14 @@ public class AuthService : IAuthService
         _userRepository = userRepository;
         _passwordService = passwordService;
         _jwtTokenService = jwtTokenService;
+        _jwtSettings = jwtSettings;
     }
 
-    public async Task<AuthResult<UserDto>> RegisterUser(RegisterUserRequest req)
+    public async Task<Result<UserDto>> RegisterUser(RegisterUserRequest req)
     {
         var existing = await _userRepository.GetByUserNameAsync(req.Email);
         if (existing != null)
-            return new AuthResult<UserDto>()
-            {
-                Success = false,
-                StatusCode = 409,
-                Message = "UserName already taken"
-            };
+            return Result<UserDto>.Fail(new Error(ErrorCode.BadRequest, "A user with this email already exists."));
 
         _passwordService.CreatePasswordHash(req.Password, out var hash, out var salt);
 
@@ -49,50 +46,31 @@ public class AuthService : IAuthService
 
         var created = await _userRepository.AddUserAsync(user);
 
-        return new AuthResult<UserDto>()
+        return Result<UserDto>.Ok(new UserDto()
         {
-            Success = true,
-            StatusCode = 201,
-            ReturnObject = new UserDto()
-            {
-                UserKey = created.UserKey,
-                UserName = created.Email,
-                CreatedAt = created.CreatedAt
-            }
-        };
+            UserKey = created.UserKey,
+            UserName = created.Email,
+            CreatedAt = created.CreatedAt
+        });
     }
     
-    public async Task<AuthResult<LoginResponse>> LoginUser(UserLoginRequest req)
+    public async Task<Result<LoginResponse>> LoginUser(UserLoginRequest req)
     {
         var user = await _userRepository.GetByUserNameAsync(req.UserName);
         if (user == null)
-            return new AuthResult<LoginResponse>()
-            {
-                Success = false,
-                StatusCode = 401,
-                Message = "Invalid credentials"
-            };
+            return Result<LoginResponse>.Fail(new Error(ErrorCode.NotFound, "User not found."));
 
         var valid = _passwordService.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt);
         if (!valid)
-            return new AuthResult<LoginResponse>()
-            {
-                Success = false,
-                StatusCode = 401,
-                Message = "Invalid credentials"
-            };
+            return Result<LoginResponse>.Fail(new Error(ErrorCode.Unauthorized, "Invalid credentials"));
 
         var token = _jwtTokenService.GenerateToken(user);
 
-        return new AuthResult<LoginResponse>()
+        return Result<LoginResponse>.Ok(new LoginResponse
         {
-            Success = true,
-            StatusCode = 200,
-            ReturnObject = new LoginResponse(
-                AccessToken: token,
-                TokenType: "Bearer",
-                ExpiresIn: 3600 // This should ideally come from JwtSettings
-            )
-        };
+            AccessToken = token,
+            TokenType = "Bearer",
+            ExpiresIn = _jwtSettings.Value.ExpirationMinutes
+        });
     }
 }

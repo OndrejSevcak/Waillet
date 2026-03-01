@@ -1,3 +1,4 @@
+using WailletAPI.Common;
 using WailletAPI.Dto;
 using WailletAPI.Models.Auth;
 
@@ -5,6 +6,6 @@ namespace WailletAPI.Services;
 
 public interface IAuthService
 {
-    Task<AuthResult<UserDto>> RegisterUser(RegisterUserRequest req);
-    Task<AuthResult<LoginResponse>> LoginUser(UserLoginRequest req);
+    Task<Result<UserDto>> RegisterUser(RegisterUserRequest req);
+    Task<Result<LoginResponse>> LoginUser(UserLoginRequest req);
 }
