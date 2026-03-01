@@ -8,4 +8,5 @@ public interface IAccountService
 {
     Task<Result<Account>> CreateWalletAccount(long userKey, string asset);
     Task<Result<WalletBalanceDto>> GetWalletBalanceAsync(long userKey, long accKey);
+    Task<Result<IReadOnlyList<WalletTransactionHistoryItemDto>>> GetAccountTransactionHistoryAsync(long userKey, long accKey);
 }

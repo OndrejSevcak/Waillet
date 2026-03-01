@@ -7,11 +7,11 @@ A custodial crypto wallet web app that allows users to:
 - Track portfolio
 - View transaction history
 
-*This is a personal coding project. Not going to be lanuched.*
+*This is a personal coding project. Not going to be launched.*
 
 ## High-Level System Architecture
 
-### Frontend
+### Frontend - TODO
 
 - React (vite) or Blazor
 - Auth UI
@@ -19,14 +19,14 @@ A custodial crypto wallet web app that allows users to:
 - Swap screen 
 - History
 
-### Backend 
+### Backend - In progress
 
 - .NET API
 
 Core services:
 
-- Auth Service
-- Wallet Service 
+- Auth Service - DONE
+- Wallet Service - DONE
 - Ledger Service 
 - Blockchain Service 
 - Conversion Service 

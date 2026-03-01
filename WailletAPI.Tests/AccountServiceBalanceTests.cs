@@ -80,6 +80,94 @@ public class AccountServiceBalanceTests
         Assert.Equal(ErrorCode.Forbidden, result.Error!.Code);
     }
 
+    [Fact]
+    public async Task GetAccountTransactionHistoryAsync_ExistingOwnedAccount_ReturnsTransactionHistory()
+    {
+        var accountRepo = new FakeAccountRepository
+        {
+            Account = new Account { AccKey = 42, UserKey = 5, Asset = "BTC" }
+        };
+
+        var ledgerRepo = new FakeLedgerRepository
+        {
+            Transactions =
+            [
+                new Ledger
+                {
+                    Id = 1001,
+                    AccKey = 42,
+                    Asset = "BTC",
+                    Amount = 0.5m,
+                    Type = "Deposit",
+                    ReferenceId = 901,
+                    ReferenceType = "Deposit",
+                    CreatedAt = new DateTime(2026, 1, 10, 8, 30, 0, DateTimeKind.Utc)
+                },
+                new Ledger
+                {
+                    Id = 1002,
+                    AccKey = 42,
+                    Asset = "BTC",
+                    Amount = -0.1m,
+                    Type = "Withdrawal",
+                    ReferenceId = 902,
+                    ReferenceType = "Withdrawal",
+                    CreatedAt = new DateTime(2026, 1, 11, 9, 15, 0, DateTimeKind.Utc)
+                }
+            ]
+        };
+
+        var service = new AccountService(
+            new FakeUserRepository(),
+            accountRepo,
+            new FakeAssetRepository(),
+            ledgerRepo);
+
+        var result = await service.GetAccountTransactionHistoryAsync(5, 42);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value.Count);
+        Assert.Equal(1001, result.Value[0].Id);
+        Assert.Equal("Deposit", result.Value[0].Type);
+        Assert.Equal(1002, result.Value[1].Id);
+        Assert.Equal("Withdrawal", result.Value[1].Type);
+    }
+
+    [Fact]
+    public async Task GetAccountTransactionHistoryAsync_MissingAccount_ReturnsNotFound()
+    {
+        var service = new AccountService(
+            new FakeUserRepository(),
+            new FakeAccountRepository(),
+            new FakeAssetRepository(),
+            new FakeLedgerRepository());
+
+        var result = await service.GetAccountTransactionHistoryAsync(1, 999);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorCode.NotFound, result.Error!.Code);
+    }
+
+    [Fact]
+    public async Task GetAccountTransactionHistoryAsync_NotOwnedAccount_ReturnsForbidden()
+    {
+        var accountRepo = new FakeAccountRepository
+        {
+            Account = new Account { AccKey = 77, UserKey = 11, Asset = "ETH" }
+        };
+
+        var service = new AccountService(
+            new FakeUserRepository(),
+            accountRepo,
+            new FakeAssetRepository(),
+            new FakeLedgerRepository());
+
+        var result = await service.GetAccountTransactionHistoryAsync(3, 77);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorCode.Forbidden, result.Error!.Code);
+    }
+
     private sealed class FakeUserRepository : IUserRepository
     {
         public Task<User> AddUserAsync(User user) => Task.FromResult(user);
@@ -116,7 +204,10 @@ public class AccountServiceBalanceTests
     private sealed class FakeLedgerRepository : ILedgerRepository
     {
         public decimal Balance { get; set; }
+        public IReadOnlyList<Ledger> Transactions { get; set; } = [];
 
         public Task<decimal> GetAccountBalanceAsync(long accKey) => Task.FromResult(Balance);
+
+        public Task<IReadOnlyList<Ledger>> GetAccountTransactionsAsync(long accKey) => Task.FromResult(Transactions);
     }
 }

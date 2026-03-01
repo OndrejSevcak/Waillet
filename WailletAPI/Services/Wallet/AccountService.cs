@@ -86,4 +86,36 @@ public class AccountService : IAccountService
 
         return Result<WalletBalanceDto>.Ok(walletBalance);
     }
+
+    public async Task<Result<IReadOnlyList<WalletTransactionHistoryItemDto>>> GetAccountTransactionHistoryAsync(long userKey, long accKey)
+    {
+        var account = await _accountRepository.GetByAccKeyAsync(accKey);
+        if (account is null)
+        {
+            return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Fail(new Error(ErrorCode.NotFound, "Wallet account not found"));
+        }
+
+        if (account.UserKey != userKey)
+        {
+            return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Fail(new Error(ErrorCode.Forbidden, "Access to wallet account is forbidden"));
+        }
+
+        var ledgerEntries = await _ledgerRepository.GetAccountTransactionsAsync(accKey);
+
+        var transactionHistory = ledgerEntries
+            .Select(entry => new WalletTransactionHistoryItemDto
+            {
+                Id = entry.Id,
+                AccKey = entry.AccKey,
+                Asset = entry.Asset,
+                Amount = entry.Amount,
+                Type = entry.Type,
+                ReferenceId = entry.ReferenceId,
+                ReferenceType = entry.ReferenceType,
+                CreatedAt = entry.CreatedAt
+            })
+            .ToList();
+
+        return Result<IReadOnlyList<WalletTransactionHistoryItemDto>>.Ok(transactionHistory);
+    }
 }

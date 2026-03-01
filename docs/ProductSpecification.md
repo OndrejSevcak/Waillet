@@ -107,7 +107,7 @@ Each user will have a separate wallet account for each crypto asset.
 
 * Create wallet account - DONE
 * Retrieve wallet balance per asset - DONE
-* Retrieve account transaction history
+* Retrieve account transaction history - DONE
 
 ### Entity: WalletAccount
 
