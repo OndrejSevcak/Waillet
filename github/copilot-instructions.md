@@ -1,3 +1,1 @@
- - Version Enforcement: "Always target .NET 10 (LTS) and use file-scoped namespaces."
- - Naming Conventions: "Follow standard .NET PascalCase for public members and _camelCase for private fields."
- - Safety: "Never suggest Newtonsoft.Json; always prefer System.Text.Json."
+Always respect instructions defined in **[AGENTS.md](../AGENTS.md)** file. 
