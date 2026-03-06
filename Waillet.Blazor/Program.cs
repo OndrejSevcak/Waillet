@@ -1,5 +1,6 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using Waillet.Blazor.Components;
+using Waillet.Blazor.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,14 @@ builder.Services.AddRazorComponents()
 
 // Register Fluent UI components services
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
+{
+    var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(apiBaseUrl)
+        ? "https://localhost:7005/"
+        : apiBaseUrl);
+});
 
 var app = builder.Build();
 
