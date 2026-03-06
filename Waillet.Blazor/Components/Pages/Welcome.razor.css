@@ -1,0 +1,202 @@
+.welcome-shell {
+    --auth-bg: radial-gradient(circle at top, rgba(15, 55, 73, 0.9), rgba(7, 15, 29, 0.95));
+    --auth-glow: rgba(0, 227, 187, 0.25);
+    --auth-accent: #00e3bb;
+    --auth-accent-strong: #f5a524;
+    --auth-ink: #e6f4ff;
+    --auth-muted: rgba(230, 244, 255, 0.7);
+
+    display: flex;
+    flex-direction: column;
+    gap: 2.2rem;
+    padding: 2.8rem 2rem;
+    border-radius: 24px;
+    background: var(--auth-bg);
+    color: var(--auth-ink);
+    position: relative;
+    overflow: hidden;
+    min-height: 70vh;
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+.user-menu {
+    position: absolute;
+    top: 1.6rem;
+    right: 1.6rem;
+    z-index: 2;
+}
+
+.user-button {
+    border-radius: 999px;
+    background: rgba(6, 18, 33, 0.7);
+    border: 1px solid rgba(0, 227, 187, 0.2);
+    color: var(--auth-ink);
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 3.2rem;
+    right: 0;
+    min-width: 160px;
+    padding: 0.4rem;
+    border-radius: 12px;
+    background: rgba(7, 16, 31, 0.95);
+    border: 1px solid rgba(0, 227, 187, 0.2);
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.35);
+    z-index: 3;
+}
+
+.dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--auth-ink);
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 227, 187, 0.12);
+}
+
+.welcome-shell::before {
+    content: "";
+    position: absolute;
+    inset: -15% auto auto -10%;
+    height: 65%;
+    width: 55%;
+    background: radial-gradient(circle, rgba(0, 227, 187, 0.3), transparent 65%);
+    filter: blur(8px);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.welcome-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.32;
+    pointer-events: none;
+}
+
+.welcome-banner {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    color: var(--auth-muted);
+    margin-bottom: 1.5rem;
+}
+
+.badge-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--auth-accent);
+    box-shadow: 0 0 12px var(--auth-accent);
+}
+
+.welcome-banner h1 {
+    font-size: clamp(2.1rem, 3vw, 3rem);
+    margin-bottom: 1rem;
+}
+
+.welcome-banner p {
+    color: var(--auth-muted);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+
+.welcome-stats {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.2rem;
+}
+
+.grid-card {
+    padding: 1.2rem 1.4rem;
+    border-radius: 18px;
+    background: rgba(6, 18, 33, 0.78);
+    border: 1px solid rgba(0, 227, 187, 0.18);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.32);
+}
+
+.grid-title {
+    font-size: 0.85rem;
+    color: var(--auth-muted);
+}
+
+.grid-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.welcome-action {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.6rem 1.8rem;
+    border-radius: 18px;
+    border: 1px dashed rgba(245, 165, 36, 0.55);
+    background: rgba(9, 22, 40, 0.7);
+    gap: 1rem;
+}
+
+.action-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.action-copy {
+    color: var(--auth-muted);
+    margin-top: 0.4rem;
+}
+
+.action-pill {
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(245, 165, 36, 0.18);
+    color: var(--auth-ink);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.primary-action {
+    width: fit-content;
+}
+
+@media (max-width: 900px) {
+    .welcome-shell {
+        padding: 2rem 1.5rem;
+    }
+
+    .welcome-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-action {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -1,0 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Waillet.Blazor.Models.Forms;
+
+public class RegisterFormModel
+{
+    [Required]
+    [EmailAddress(ErrorMessage = "Invalid email address format")]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
+    public string Password { get; set; } = string.Empty;
+}

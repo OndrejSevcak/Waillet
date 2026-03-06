@@ -11,10 +11,10 @@ A custodial crypto wallet web app that allows users to:
 
 ## High-Level System Architecture
 
-### Frontend - TODO
+### Frontend - In progress
 
-- React (vite) or Blazor
-- Auth UI
+- Blazor (interactive server)
+- Auth UI (login + sign-up)
 - Wallet Dashboard 
 - Swap screen 
 - History
@@ -38,6 +38,14 @@ Infrastructure
 - Redis (price cache)
 - Blockchain RPC providers
 - Background workers
+
+## Frontend Setup
+
+### Blazor Client
+
+- Configure the API base URL in Waillet.Blazor appsettings.json or appsettings.Development.json:
+    - ApiBaseUrl: https://localhost:7005/
+- Run the API and Blazor apps together so the login page can call the /api/auth endpoints.
 
 ## High-Level System Architecture Diagram
 

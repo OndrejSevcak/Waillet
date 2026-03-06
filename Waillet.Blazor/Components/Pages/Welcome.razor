@@ -1,0 +1,57 @@
+@page "/welcome"
+@using Microsoft.FluentUI.AspNetCore.Components
+
+<PageTitle>Welcome</PageTitle>
+
+<div class="welcome-shell">
+    <div class="user-menu">
+        <FluentButton Appearance="Appearance.Stealth" class="user-button" IconStart="@(new Icons.Regular.Size20.Person())"
+                      OnClick="ToggleUserMenu" />
+        @if (isUserMenuOpen)
+        {
+            <div class="user-dropdown" role="menu">
+                <button type="button" class="dropdown-item" @onclick="HandleLogout">
+                    Logout
+                </button>
+            </div>
+        }
+    </div>
+    <header class="welcome-banner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Portfolio ready
+        </div>
+        <h1>Welcome to your Waillet hub</h1>
+        <p>
+            Your secure vault is ready. Create a wallet account to start holding and moving crypto assets.
+        </p>
+        <FluentButton Type="ButtonType.Button" class="primary-action" OnClick="HandleCreateWallet">
+            Create new wallet account
+        </FluentButton>
+    </header>
+
+    <section class="welcome-stats">
+        <div class="grid-card">
+            <div class="grid-title">Network status</div>
+            <div class="grid-value">All systems green</div>
+        </div>
+        <div class="grid-card">
+            <div class="grid-title">Cold storage</div>
+            <div class="grid-value">99.9% insured</div>
+        </div>
+        <div class="grid-card">
+            <div class="grid-title">Settlement</div>
+            <div class="grid-value">Instant internal</div>
+        </div>
+    </section>
+
+    <section class="welcome-action">
+        <div>
+            <div class="action-title">Spin up your first wallet</div>
+            <div class="action-copy">
+                Create separate accounts for each asset and track balances across your portfolio.
+            </div>
+        </div>
+        <div class="action-pill">No fees on internal transfers</div>
+    </section>
+</div>

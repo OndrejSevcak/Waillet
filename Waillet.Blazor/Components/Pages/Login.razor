@@ -1,0 +1,77 @@
+@page "/login"
+<PageTitle>Login</PageTitle>
+
+<div class="auth-shell">
+    <section class="auth-hero">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Secure access
+        </div>
+        <h1>Welcome back to Waillet</h1>
+        <p>
+            Sign in to manage your assets, or create a new account to start building a secure crypto portfolio.
+        </p>
+        <div class="hero-strip">
+            <div class="strip-item">
+                <div class="strip-value">$42,517</div>
+                <div class="strip-label">BTC spot</div>
+            </div>
+            <div class="strip-item">
+                <div class="strip-value">$2,980</div>
+                <div class="strip-label">ETH spot</div>
+            </div>
+            <div class="strip-item">
+                <div class="strip-value">24/7</div>
+                <div class="strip-label">Wallet uptime</div>
+            </div>
+        </div>
+    </section>
+
+    <FluentCard class="auth-card">
+        <div class="card-title">Access portal</div>
+        <FluentTabs @bind-ActiveTabId="activeTabId">
+            <FluentTab Id="signin" Label="Sign in">
+                <EditForm Model="loginModel" OnValidSubmit="HandleLoginAsync" FormName="signin-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="form-grid">
+                        <FluentTextField Label="Email" Placeholder="you@domain.com" @bind-Value="loginModel.Email"
+                                         Type="TextFieldType.Email" Autocomplete="email" />
+                        <FluentTextField Label="Password" Placeholder="Minimum 6 characters" @bind-Value="loginModel.Password"
+                                         Type="TextFieldType.Password" Autocomplete="current-password" />
+                    </div>
+                    <div class="form-actions">
+                        <FluentButton Type="ButtonType.Submit" Disabled="isBusy" class="auth-button">
+                            Sign in
+                        </FluentButton>
+                        <span class="form-hint">New to Waillet? Switch to Sign up.</span>
+                    </div>
+                </EditForm>
+            </FluentTab>
+
+            <FluentTab Id="signup" Label="Sign up">
+                <EditForm Model="registerModel" OnValidSubmit="HandleRegisterAsync" FormName="signup-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="form-grid">
+                        <FluentTextField Label="Email" Placeholder="you@domain.com" @bind-Value="registerModel.Email"
+                                         Type="TextFieldType.Email" Autocomplete="email" />
+                        <FluentTextField Label="Password" Placeholder="Minimum 6 characters" @bind-Value="registerModel.Password"
+                                         Type="TextFieldType.Password" Autocomplete="new-password" />
+                    </div>
+                    <div class="form-actions">
+                        <FluentButton Type="ButtonType.Submit" Disabled="isBusy" class="auth-button">
+                            Create account
+                        </FluentButton>
+                        <span class="form-hint">Already registered? Switch to Sign in.</span>
+                    </div>
+                </EditForm>
+            </FluentTab>
+        </FluentTabs>
+
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="status-line">@statusMessage</div>
+        }
+    </FluentCard>
+</div>

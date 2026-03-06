@@ -32,7 +32,8 @@ Key technologies: C#, .NET, Entity Framework Core, SQL Server, JWT for authentic
    - Use dependency injection for services and repositories.
 
 4. **Blazor specific rules**
-   - Use Razor components with proper separation of concerns: logic in .cs files, UI in .razor.
+   - Use Razor components with proper separation of concerns: logic in .cs files (code behind), UI in .razor.
+   - when creating a code behind .cs file, do not create any additoinal private classes in a code behing file for a component or page. Additinal classes should be created in Models folder 
    - Avoid direct DOM manipulation; use Blazor's data binding and event handling.
    - Optimize performance by using @key directives in loops and minimizing re-renders.
    - Follow component naming conventions: e.g., WalletComponent.razor.
