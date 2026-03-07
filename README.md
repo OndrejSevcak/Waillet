@@ -43,8 +43,7 @@ Infrastructure
 
 ### Blazor Client
 
-- Configure the API base URL in Waillet.Blazor appsettings.json or appsettings.Development.json:
-    - ApiBaseUrl: https://localhost:7005/
+- Configure the API base URL in Waillet.Blazor appsettings.json or appsettings.Development.json
 - Run the API and Blazor apps together so the login page can call the /api/auth endpoints.
 
 ## High-Level System Architecture Diagram
@@ -52,7 +51,7 @@ Infrastructure
 ```mermaid
 flowchart TB
 
-    FE[React Frontend]
+    FE[Blazor/React Frontend]
 
     API[API Gateway<br/>ASP.NET Core API]
 
@@ -87,3 +86,4 @@ flowchart TB
     BL --> RPC
 ```
 
+Instructions for coding agents are in the AGENTS.md file
