@@ -163,6 +163,14 @@
     gap: 1rem;
 }
 
+.welcome-action-form {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 33.333%;
+    align-self: center;
+}
+
 .action-title {
     font-size: 1.1rem;
     font-weight: 600;
@@ -186,6 +194,26 @@
     width: fit-content;
 }
 
+.wallet-form-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.2rem;
+}
+
+.wallet-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.6rem;
+}
+
+::deep .validation-message {
+    color: #ff9b9b;
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+
 @media (max-width: 900px) {
     .welcome-shell {
         padding: 2rem 1.5rem;
@@ -198,5 +226,14 @@
     .welcome-action {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .welcome-action-form {
+        max-width: 100%;
+    }
+
+    .wallet-form-actions {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

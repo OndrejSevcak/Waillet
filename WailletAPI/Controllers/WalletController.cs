@@ -88,4 +88,16 @@ public class WalletController : ControllerBase
 
         return StatusCode((int)result.Error!.Code, result.Error.Message);
     }
+
+    [HttpGet("assets")]
+    public async Task<ActionResult<IReadOnlyList<AssetDto>>> GetSupportedAssets()
+    {
+        var result = await _accountService.GetSupportedAssetsAsync();
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+
+        return StatusCode((int)result.Error!.Code, result.Error.Message);
+    }
 }

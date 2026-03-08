@@ -33,12 +33,15 @@
             <FluentTab Id="signin" Label="Sign in">
                 <EditForm Model="loginModel" OnValidSubmit="HandleLoginAsync" FormName="signin-form">
                     <DataAnnotationsValidator />
-                    <ValidationSummary />
                     <div class="form-grid">
                         <FluentTextField Label="Email" Placeholder="you@domain.com" @bind-Value="loginModel.Email"
                                          Type="TextFieldType.Email" Autocomplete="email" />
                         <FluentTextField Label="Password" Placeholder="Minimum 6 characters" @bind-Value="loginModel.Password"
                                          Type="TextFieldType.Password" Autocomplete="current-password" />
+                        <div>
+                            <ValidationMessage For="@(() => loginModel.Email)" />
+                            <ValidationMessage For="@(() => loginModel.Password)" />
+                        </div>
                     </div>
                     <div class="form-actions">
                         <FluentButton Type="ButtonType.Submit" Disabled="isBusy" class="auth-button">
@@ -52,12 +55,15 @@
             <FluentTab Id="signup" Label="Sign up">
                 <EditForm Model="registerModel" OnValidSubmit="HandleRegisterAsync" FormName="signup-form">
                     <DataAnnotationsValidator />
-                    <ValidationSummary />
                     <div class="form-grid">
                         <FluentTextField Label="Email" Placeholder="you@domain.com" @bind-Value="registerModel.Email"
                                          Type="TextFieldType.Email" Autocomplete="email" />
                         <FluentTextField Label="Password" Placeholder="Minimum 6 characters" @bind-Value="registerModel.Password"
                                          Type="TextFieldType.Password" Autocomplete="new-password" />
+                        <div>
+                            <ValidationMessage For="@(() => registerModel.Email)" />
+                            <ValidationMessage For="@(() => registerModel.Password)" />
+                        </div>
                     </div>
                     <div class="form-actions">
                         <FluentButton Type="ButtonType.Submit" Disabled="isBusy" class="auth-button">

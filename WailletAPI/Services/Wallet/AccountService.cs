@@ -135,4 +135,20 @@ public class AccountService : IAccountService
 
         return Result<WalletTransactionHistoryPageDto>.Ok(pageResult);
     }
+
+    public async Task<Result<IReadOnlyList<AssetDto>>> GetSupportedAssetsAsync()
+    {
+        var assets = await _assetRepository.GetAllAsync();
+
+        var assetDtos = assets
+            .Select(asset => new AssetDto
+            {
+                Symbol = asset.Symbol,
+                Name = asset.Name,
+                Decimals = asset.Decimals
+            })
+            .ToList();
+
+        return Result<IReadOnlyList<AssetDto>>.Ok(assetDtos);
+    }
 }

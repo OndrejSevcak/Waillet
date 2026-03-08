@@ -25,33 +25,72 @@
         <p>
             Your secure vault is ready. Create a wallet account to start holding and moving crypto assets.
         </p>
-        <FluentButton Type="ButtonType.Button" class="primary-action" OnClick="HandleCreateWallet">
-            Create new wallet account
-        </FluentButton>
     </header>
 
-    <section class="welcome-stats">
-        <div class="grid-card">
-            <div class="grid-title">Network status</div>
-            <div class="grid-value">All systems green</div>
-        </div>
-        <div class="grid-card">
-            <div class="grid-title">Cold storage</div>
-            <div class="grid-value">99.9% insured</div>
-        </div>
-        <div class="grid-card">
-            <div class="grid-title">Settlement</div>
-            <div class="grid-value">Instant internal</div>
-        </div>
-    </section>
-
-    <section class="welcome-action">
-        <div>
-            <div class="action-title">Spin up your first wallet</div>
-            <div class="action-copy">
-                Create separate accounts for each asset and track balances across your portfolio.
+    @if (!showWalletForm)
+    {
+        <section class="welcome-stats">
+            <div class="grid-card">
+                <div class="grid-title">Network status</div>
+                <div class="grid-value">All systems green</div>
             </div>
-        </div>
-        <div class="action-pill">No fees on internal transfers</div>
-    </section>
+            <div class="grid-card">
+                <div class="grid-title">Cold storage</div>
+                <div class="grid-value">99.9% insured</div>
+            </div>
+            <div class="grid-card">
+                <div class="grid-title">Settlement</div>
+                <div class="grid-value">Instant internal</div>
+            </div>
+        </section>
+
+        <section class="welcome-action">
+            <div>
+                <div class="action-title">Spin up your first wallet</div>
+                <div class="action-copy">
+                    Create separate accounts for each asset and track balances across your portfolio.
+                </div>
+            </div>
+            <FluentButton Type="ButtonType.Button" class="primary-action" OnClick="HandleCreateWallet">
+                Create wallet account
+            </FluentButton>
+        </section>
+    }
+    else
+    {
+        <section class="welcome-action welcome-action-form">
+            <EditForm Model="createAccountModel" OnValidSubmit="HandleCreateWalletSubmit">
+                <DataAnnotationsValidator />
+                <div class="action-title">Create wallet account</div>
+                <div class="action-copy">
+                    Pick the account type, currency, and opening balance for your new wallet.
+                </div>
+                <div class="wallet-form-grid">
+                    <FluentSelect TOption="bool" Items="accountTypeOptions"
+                                  OptionText="@(option => option ? "Crypto" : "Fiat")"
+                                  OptionValue="@(option => option ? "Crypto" : "Fiat")"
+                                  @bind-SelectedOption="createAccountModel.CryptoFlag"
+                                  Label="Account type" />
+                    <FluentSelect TOption="string" Items="currencyOptions"
+                                  OptionText="@(option => option)"
+                                  OptionValue="@(option => option)"
+                                  @bind-SelectedOption="createAccountModel.CurrencyCode"
+                                  Label="Currency" />
+                    <ValidationMessage For="@(() => createAccountModel.CurrencyCode)" />
+                    <FluentTextField Label="Initial balance" Placeholder="0.00"
+                                     @bind-Value="createAccountModel.InitialBalance"
+                                     Type="TextFieldType.Number" />
+                    <ValidationMessage For="@(() => createAccountModel.InitialBalance)" />
+                </div>
+                <div class="wallet-form-actions">
+                    <FluentButton Type="ButtonType.Submit" class="primary-action">
+                        Create account
+                    </FluentButton>
+                    <FluentButton Type="ButtonType.Button" Appearance="Appearance.Stealth" OnClick="HandleCancelCreateWallet">
+                        Cancel
+                    </FluentButton>
+                </div>
+            </EditForm>
+        </section>
+    }
 </div>
