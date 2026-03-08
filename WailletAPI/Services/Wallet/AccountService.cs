@@ -2,6 +2,7 @@ using WailletAPI.Common;
 using WailletAPI.Dto;
 using WailletAPI.Entities;
 using WailletAPI.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace WailletAPI.Services.Wallet;
 
@@ -36,6 +37,8 @@ public class AccountService : IAccountService
     /// </summary>
     public async Task<Result<Account>> CreateWalletAccount(long userKey, string asset)
     {
+        var normalizedAsset = asset.Trim().ToUpperInvariant();
+
         var user = await _userRepository.GetByIdAsync(userKey);
         if (user is null)
         {
@@ -43,13 +46,13 @@ public class AccountService : IAccountService
         }
         
         var availableAssets = await _assetRepository.GetAllAsync();
-        if (!availableAssets.Any(a => a.Symbol.Equals(asset, StringComparison.OrdinalIgnoreCase)))
+        if (!availableAssets.Any(a => a.Symbol.Equals(normalizedAsset, StringComparison.OrdinalIgnoreCase)))
         {
             return Result<Account>.Fail(new Error(ErrorCode.BadRequest, $"Asset '{asset}' is not supported"));
         }
         
         var existingAccounts = await _accountRepository.GetAccountsByUserAsync(userKey);
-        if (existingAccounts.Any(a => a.Asset == asset))
+        if (existingAccounts.Any(a => a.Asset.Equals(normalizedAsset, StringComparison.OrdinalIgnoreCase)))
         {
             return Result<Account>.Fail(new Error(ErrorCode.Conflict, $"Wallet account for {asset} asset already exists"));
         }
@@ -57,11 +60,18 @@ public class AccountService : IAccountService
         var account = new Account
         {
             UserKey = userKey,
-            Asset = asset,
+            Asset = normalizedAsset,
         };
-        
-        var created = await _accountRepository.CreateAccountAsync(account);
-        return Result<Account>.Ok(created);
+
+        try
+        {
+            var created = await _accountRepository.CreateAccountAsync(account);
+            return Result<Account>.Ok(created);
+        }
+        catch (DbUpdateException)
+        {
+            return Result<Account>.Fail(new Error(ErrorCode.Conflict, $"Wallet account for {asset} asset already exists"));
+        }
     }
 
     public async Task<Result<WalletBalanceDto>> GetWalletBalanceAsync(long userKey, long accKey)

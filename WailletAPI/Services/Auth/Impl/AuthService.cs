@@ -58,7 +58,7 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.GetByUserNameAsync(req.UserName);
         if (user == null)
-            return Result<LoginResponse>.Fail(new Error(ErrorCode.NotFound, "User not found."));
+            return Result<LoginResponse>.Fail(new Error(ErrorCode.Unauthorized, "Invalid credentials"));
 
         var valid = _passwordService.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt);
         if (!valid)
