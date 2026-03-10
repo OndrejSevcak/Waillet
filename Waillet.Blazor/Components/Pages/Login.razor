@@ -13,16 +13,16 @@
         </p>
         <div class="hero-strip">
             <div class="strip-item">
-                <div class="strip-value">$42,517</div>
-                <div class="strip-label">BTC spot</div>
-            </div>
-            <div class="strip-item">
-                <div class="strip-value">$2,980</div>
-                <div class="strip-label">ETH spot</div>
-            </div>
-            <div class="strip-item">
                 <div class="strip-value">24/7</div>
-                <div class="strip-label">Wallet uptime</div>
+                <div class="strip-label">Availability</div>
+            </div>
+            <div class="strip-item">
+                <div class="strip-value">99.9%</div>
+                <div class="strip-label">Cold storage insured</div>
+            </div>
+            <div class="strip-item">
+                <div class="strip-value">Instant</div>
+                <div class="strip-label">Internal settlement</div>
             </div>
         </div>
     </section>
@@ -74,10 +74,5 @@
                 </EditForm>
             </FluentTab>
         </FluentTabs>
-
-        @if (!string.IsNullOrWhiteSpace(statusMessage))
-        {
-            <div class="status-line">@statusMessage</div>
-        }
     </FluentCard>
 </div>

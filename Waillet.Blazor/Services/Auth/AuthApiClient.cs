@@ -15,39 +15,35 @@ public class AuthApiClient : IAuthApiClient
 
     public async Task<ApiResult<UserDto>> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/register", request, cancellationToken);
-        return await ToResult<UserDto>(response, cancellationToken);
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", request, cancellationToken);
+            return await response.ToApiResultAsync<UserDto>(cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResult<UserDto>.Fail($"Unable to reach the server: {ex.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            return ApiResult<UserDto>.Fail("The request timed out. Please try again.");
+        }
     }
 
     public async Task<ApiResult<LoginResponse>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/login", request, cancellationToken);
-        return await ToResult<LoginResponse>(response, cancellationToken);
-    }
-
-    private static async Task<ApiResult<T>> ToResult<T>(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var value = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
-            if (value is null)
-            {
-                return ApiResult<T>.Fail("Empty response from server.");
-            }
-
-            return ApiResult<T>.Success(value);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/login", request, cancellationToken);
+            return await response.ToApiResultAsync<LoginResponse>(cancellationToken);
         }
-
-        var errorText = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (string.IsNullOrWhiteSpace(errorText))
+        catch (HttpRequestException ex)
         {
-            errorText = $"Request failed with status {(int)response.StatusCode}.";
+            return ApiResult<LoginResponse>.Fail($"Unable to reach the server: {ex.Message}");
         }
-        else
+        catch (TaskCanceledException)
         {
-            errorText = errorText.Trim().Trim('"');
+            return ApiResult<LoginResponse>.Fail("The request timed out. Please try again.");
         }
-
-        return ApiResult<T>.Fail(errorText);
     }
 }

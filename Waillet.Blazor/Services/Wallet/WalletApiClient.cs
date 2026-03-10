@@ -15,28 +15,36 @@ public class WalletApiClient : IWalletApiClient
 
     public async Task<ApiResult<IReadOnlyList<AssetDto>>> GetSupportedAssetsAsync(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync("api/wallet/assets", cancellationToken);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var assets = await response.Content.ReadFromJsonAsync<IReadOnlyList<AssetDto>>(cancellationToken: cancellationToken);
-            if (assets is null)
-            {
-                return ApiResult<IReadOnlyList<AssetDto>>.Fail("Empty response from server.");
-            }
-
-            return ApiResult<IReadOnlyList<AssetDto>>.Success(assets);
+            var response = await _httpClient.GetAsync("api/wallet/assets", cancellationToken);
+            return await response.ToApiResultAsync<IReadOnlyList<AssetDto>>(cancellationToken);
         }
-
-        var errorText = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (string.IsNullOrWhiteSpace(errorText))
+        catch (HttpRequestException ex)
         {
-            errorText = $"Request failed with status {(int)response.StatusCode}.";
+            return ApiResult<IReadOnlyList<AssetDto>>.Fail($"Unable to reach the server: {ex.Message}");
         }
-        else
+        catch (TaskCanceledException)
         {
-            errorText = errorText.Trim().Trim('"');
+            return ApiResult<IReadOnlyList<AssetDto>>.Fail("The request timed out. Please try again.");
         }
+    }
 
-        return ApiResult<IReadOnlyList<AssetDto>>.Fail(errorText);
+    public async Task<ApiResult<AccountDto>> CreateWalletAccountAsync(string asset, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync(
+                $"api/wallet/accounts/create/{Uri.EscapeDataString(asset)}", null, cancellationToken);
+            return await response.ToApiResultAsync<AccountDto>(cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResult<AccountDto>.Fail($"Unable to reach the server: {ex.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            return ApiResult<AccountDto>.Fail("The request timed out. Please try again.");
+        }
     }
 }

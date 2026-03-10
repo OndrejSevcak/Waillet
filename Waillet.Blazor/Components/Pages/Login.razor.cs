@@ -9,6 +9,7 @@ namespace Waillet.Blazor.Components.Pages;
 public partial class Login
 {
     [Inject] private IAuthApiClient AuthApiClient { get; set; } = default!;
+    [Inject] private IAuthStateService AuthStateService { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
@@ -17,7 +18,6 @@ public partial class Login
 
     private bool isBusy;
     private string activeTabId = "signin";
-    private string? statusMessage;
 
     private async Task HandleRegisterAsync()
     {
@@ -27,7 +27,6 @@ public partial class Login
         }
 
         isBusy = true;
-        statusMessage = null;
 
         try
         {
@@ -44,11 +43,11 @@ public partial class Login
                 return;
             }
 
+            AuthStateService.SetRegisteredUser(result.Value!);
             activeTabId = "signin";
             loginModel.Email = registerModel.Email;
             registerModel.Password = string.Empty;
-            statusMessage = "Account created. Sign in to continue.";
-            ToastService.ShowSuccess("Account created successfully.");
+            ToastService.ShowSuccess("Account created. Sign in to continue.");
         }
         finally
         {
@@ -64,7 +63,6 @@ public partial class Login
         }
 
         isBusy = true;
-        statusMessage = null;
 
         try
         {
@@ -81,8 +79,7 @@ public partial class Login
                 return;
             }
 
-            statusMessage = "Signed in successfully. Token received.";
-            ToastService.ShowSuccess("Signed in.");
+            AuthStateService.SetLoginResult(result.Value!);
             NavigationManager.NavigateTo("/welcome");
         }
         finally
