@@ -1,7 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+}
+
+:root {
+    --waillet-bg: radial-gradient(circle at top, rgba(15, 55, 73, 0.9), rgba(7, 15, 29, 0.95));
+    --waillet-glow: rgba(0, 227, 187, 0.25);
+    --waillet-accent: #00e3bb;
+    --waillet-accent-strong: #f5a524;
+    --waillet-ink: #e6f4ff;
+    --waillet-muted: rgba(230, 244, 255, 0.7);
 }
 
 a, .btn-link {

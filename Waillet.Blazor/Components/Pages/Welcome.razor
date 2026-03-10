@@ -5,12 +5,19 @@
 
 <div class="welcome-shell">
     <div class="user-menu">
-        <FluentButton Appearance="Appearance.Stealth" class="user-button" IconStart="@(new Icons.Regular.Size20.Person())"
+        <FluentButton Appearance="Appearance.Stealth"
+                      class="user-button"
+                      IconStart="@(new Icons.Regular.Size20.Person())"
+                      aria-haspopup="menu"
+                      aria-expanded="@isUserMenuOpen.ToString().ToLower()"
+                      aria-label="User menu"
                       OnClick="ToggleUserMenu" />
         @if (isUserMenuOpen)
         {
-            <div class="user-dropdown" role="menu">
-                <button type="button" class="dropdown-item" @onclick="HandleLogout">
+            <div class="user-dropdown"
+                 role="menu"
+                 @onkeydown="HandleDropdownKeyDown">
+                <button type="button" class="dropdown-item" role="menuitem" @onclick="HandleLogout">
                     Logout
                 </button>
             </div>
@@ -26,6 +33,14 @@
             Your secure vault is ready. Create a wallet account to start holding and moving crypto assets.
         </p>
     </header>
+
+    @if (assetsLoadError is not null)
+    {
+        <FluentMessageBar Intent="MessageIntent.Error">
+            @assetsLoadError
+            <FluentButton Appearance="Appearance.Stealth" OnClick="@(async () => { assetsLoadError = null; await OnInitializedAsync(); })">Retry</FluentButton>
+        </FluentMessageBar>
+    }
 
     @if (!showWalletForm)
     {
@@ -59,7 +74,7 @@
     else
     {
         <section class="welcome-action welcome-action-form">
-            <EditForm Model="createAccountModel" OnValidSubmit="HandleCreateWalletSubmit">
+            <EditForm Model="createAccountModel" OnValidSubmit="HandleCreateWalletSubmitAsync">
                 <DataAnnotationsValidator />
                 <div class="action-title">Create wallet account</div>
                 <div class="action-copy">
@@ -78,13 +93,9 @@
                                   Disabled="@(isAssetsLoading || currencyOptions.Count == 0)"
                                   Label="Currency" />
                     <ValidationMessage For="@(() => createAccountModel.CurrencyCode)" />
-                    <FluentTextField Label="Initial balance" Placeholder="0.00"
-                                     @bind-Value="createAccountModel.InitialBalance"
-                                     Type="TextFieldType.Number" />
-                    <ValidationMessage For="@(() => createAccountModel.InitialBalance)" />
                 </div>
                 <div class="wallet-form-actions">
-                    <FluentButton Type="ButtonType.Submit" class="primary-action">
+                    <FluentButton Type="ButtonType.Submit" class="primary-action" Disabled="isBusy">
                         Create account
                     </FluentButton>
                     <FluentButton Type="ButtonType.Button" Appearance="Appearance.Stealth" OnClick="HandleCancelCreateWallet">

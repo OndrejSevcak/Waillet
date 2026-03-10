@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Waillet.Blazor.Components;
 using Waillet.Blazor.Services.Auth;
@@ -12,21 +13,29 @@ builder.Services.AddRazorComponents()
 // Register Fluent UI components services
 builder.Services.AddFluentUIComponents();
 
-builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
-{
-    var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
-    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(apiBaseUrl)
-        ? "https://localhost:7005/"
-        : apiBaseUrl);
-});
+// Auth state and provider
+builder.Services.AddScoped<IAuthStateService, AuthStateService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorizationCore();
 
-builder.Services.AddHttpClient<IWalletApiClient, WalletApiClient>(client =>
-{
-    var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
-    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(apiBaseUrl)
-        ? "https://localhost:7005/"
-        : apiBaseUrl);
-});
+// HTTP token handler
+builder.Services.AddTransient<AuthTokenHandler>();
+
+// Resolve API base URL once — fail fast if not configured
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
+    ?? throw new InvalidOperationException(
+        "ApiBaseUrl is not configured. Add it to appsettings.json.");
+
+var apiBaseUri = new Uri(apiBaseUrl);
+
+builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(
+    client => client.BaseAddress = apiBaseUri)
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<IWalletApiClient, WalletApiClient>(
+    client => client.BaseAddress = apiBaseUri)
+    .AddHttpMessageHandler<AuthTokenHandler>();
 
 var app = builder.Build();
 

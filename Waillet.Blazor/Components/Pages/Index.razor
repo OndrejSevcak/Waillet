@@ -1,3 +1,6 @@
 @page "/"
+@inject NavigationManager NavigationManager
 
-<Login />
+@code {
+    protected override void OnInitialized() => NavigationManager.NavigateTo("/login", replace: true);
+}
