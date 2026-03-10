@@ -1,6 +1,7 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using Waillet.Blazor.Components;
 using Waillet.Blazor.Services.Auth;
+using Waillet.Blazor.Services.Wallet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,14 @@ builder.Services.AddRazorComponents()
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
+{
+    var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(apiBaseUrl)
+        ? "https://localhost:7005/"
+        : apiBaseUrl);
+});
+
+builder.Services.AddHttpClient<IWalletApiClient, WalletApiClient>(client =>
 {
     var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
     client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(apiBaseUrl)

@@ -75,6 +75,7 @@
                                   OptionText="@(option => option)"
                                   OptionValue="@(option => option)"
                                   @bind-SelectedOption="createAccountModel.CurrencyCode"
+                                  Disabled="@(isAssetsLoading || currencyOptions.Count == 0)"
                                   Label="Currency" />
                     <ValidationMessage For="@(() => createAccountModel.CurrencyCode)" />
                     <FluentTextField Label="Initial balance" Placeholder="0.00"
